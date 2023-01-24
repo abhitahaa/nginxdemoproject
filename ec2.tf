@@ -134,3 +134,50 @@ output "ubuntu_ami_id" {
 }
 
 */
+
+resource "tls_private_key" "nginxkey" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "nginxkp" {
+  key_name   = "myKey"       # Create a "myKey" to AWS!!
+  public_key = tls_private_key.nginxkey.public_key_openssh
+
+  provisioner "local-exec" { # Create a "myKey.pem" to your computer!!
+    command = "echo '${tls_private_key.nginxkey.private_key_pem}' > ./myKey.pem"
+  }
+}
+
+# Create a new EC2 instance
+resource "aws_instance" "nginx" {
+  ami                    = "ami-06878d265978313ca"
+  instance_type          = "t2.medium"
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.example.id]
+#    provisioner "remote-exec" {
+#     connection {
+#       type        = "ssh"
+#       user        = "ec2-user"
+#       host        = aws_instance.my_instance.public_ip
+#       private_key = tls_private_key.oskey.private_key_pem
+#     }
+#     inline = [
+#       "chmod +x /tmp/install.sh",
+#       "sudo /tmp/install.sh"
+#     ]
+#   }
+}
+
+
+resource "local_file" "hosts_cfg" {
+  content = templatefile("${path.module}/hosts.tpl",
+    {
+      nginx-hosts = aws_instance.nginx[*].public_ip
+      keyfile = file("${path.module}/myKey.pem")
+    }
+  )
+  filename = "./ansible/inventory/hosts.cfg"
+  depends_on = [ aws_instance.nginx ]
+}
+

@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 
-resource "aws_instance" "ec2_example" {
+/* resource "aws_instance" "ec2_example" {
 
   ami                    = "ami-06878d265978313ca"
   instance_type          = "t2.micro"
@@ -15,7 +15,7 @@ resource "aws_instance" "ec2_example" {
     command = "aws ec2 describe-instances --instance-ids $(aws_instance.ec2_example.id) --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> /etc/ansible/hosts"
   }
 }
-
+ */
 
 # resource "aws_security_group" "main" {
 #   vpc_id = aws_vpc.example.id
@@ -47,9 +47,10 @@ resource "aws_instance" "ec2_example" {
 #   ]
 # }
 
-
+/* 
 resource "aws_key_pair" "deployer" {
   key_name   = "aws_key"
   public_key = file("/Users/abhishekbhandari/Documents/keys/aws/aws_key.pub")
 }
 
+ */
