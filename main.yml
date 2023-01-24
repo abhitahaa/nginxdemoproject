@@ -1,0 +1,37 @@
+---
+- name: Install nginx and PHP 8.1
+  hosts: ec2
+  become: true
+  tasks:
+    - name: Add repository for PHP 8.1
+      apt_repository:
+        repo: ppa:ondrej/php
+        state: present
+      tags:
+        - php
+
+    - name: Install nginx and PHP 8.1
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - nginx
+          - php8.1
+      tags:
+        - nginx
+        - php
+      notify: 
+        - start Nginx
+        - restart Nginx
+  handlers:
+    -  name: Start Nginx
+       service:
+          name: nginx
+          state: started
+          enabled: true
+    -  name: Restart Nginx
+       service:
+          name: nginx
+          state: restarted
+          enabled: true            
